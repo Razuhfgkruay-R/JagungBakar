@@ -70,29 +70,24 @@
             position: relative;
             border: 4px solid #334155;
             box-shadow: 0 0 20px rgba(0,0,0,0.3);
-            /* Transisi diperlambat jadi 0.8s agar smooth */
+            
             transition: border-color 0.3s ease, box-shadow 0.8s ease, transform 0.5s ease;
             margin-left: 2px;
         }
-
-        /* --- EMOJI ANIMATION CLASS --- */
-        /* Ini kunci agar emojinya smooth saat ganti */
+        
         .emoji-span {
             display: inline-block;
             transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.1s ease;
         }
         
-        /* Class untuk state "Hilang/Zoom Out" */
         .emoji-hidden {
             transform: scale(0) rotate(-45deg);
             opacity: 0;
         }
 
-        /* ----------------------------- */
-
         .progress-track {
             flex-grow: 1;
-            height: 40px; 
+            height: 20px; 
             position: relative;
             margin-left: -34px;
             margin-top: -2px;
@@ -106,7 +101,7 @@
             content: '';
             position: absolute;
             left: 0; right: 0;
-            height: 42px; 
+            height: 22px; 
             background: rgba(255,255,255,0.1);
             border-radius: 0 18px 18px 0; 
             z-index: -1;
@@ -121,7 +116,6 @@
             position: relative;
             z-index: 2;
             border-radius: 0 20px 20px 0;
-            /* Width transition biarkan cepat (0.4s) agar responsif, tapi shadow lambat */
             transition: width 0.4s ease-out, box-shadow 0.8s ease; 
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
@@ -134,7 +128,6 @@
             background-size: 200% 100%;
             position: relative;
             overflow: hidden;
-            /* Background transisi diperlambat jadi 1s */
             transition: background 1s ease; 
             animation: shimmer 2s infinite linear;
         }
@@ -154,8 +147,7 @@
         }
 
         @keyframes glare { 100% { transform: skewX(-20deg) translateX(200%); } }
-
-        /* --- STATES (Visual Properties) --- */
+        
         .state-low .icon-wrapper { border-color: var(--blue-main); box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
         .state-low .progress-fill-visual { background: linear-gradient(90deg, #1d4ed8, var(--blue-main)); }
         .state-low .progress-fill-wrapper { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
@@ -167,8 +159,7 @@
         .state-high .icon-wrapper { border-color: var(--red-main); }
         .state-high .progress-fill-visual { background: linear-gradient(90deg, #991b1b, var(--red-main)); }
         .state-high .progress-fill-wrapper { box-shadow: 0 4px 25px rgba(239, 68, 68, 0.8); }
-
-        /* --- ANIMASI GERAKAN (Dipisah agar tidak bentrok dengan transisi) --- */
+        
         .anim-float { animation: float 3s ease-in-out infinite; }
         .anim-sway { animation: sway 2s ease-in-out infinite; }
         .anim-shake { animation: intenseShake 0.1s infinite, fireFlicker 0.5s infinite alternate; }
@@ -243,7 +234,6 @@
         percentage.textContent = val + '%';
         barFillWrapper.style.width = val + '%';
 
-        // Deteksi Mode Baru
         let newMode = currentMode;
         let newEmojiChar = currentEmoji;
 
@@ -258,27 +248,24 @@
             newEmojiChar = '🔥';
         }
 
-        // Hanya jalankan perubahan jika mode benar-benar berubah
         if (newMode !== currentMode) {
-            // 1. Ganti State Warna (Smooth transition via CSS)
+            
             wrapper.classList.remove('state-low', 'state-mid', 'state-high');
             wrapper.classList.add('state-' + newMode);
-
-            // 2. Ganti Animasi Gerak (Float/Sway/Shake)
+            
             iconAnimTarget.classList.remove('anim-float', 'anim-sway', 'anim-shake');
             if(newMode === 'low') iconAnimTarget.classList.add('anim-float');
             if(newMode === 'mid') iconAnimTarget.classList.add('anim-sway');
             if(newMode === 'high') iconAnimTarget.classList.add('anim-shake');
 
-            // 3. EMOJI SMOOTH TRANSITION (Zoom Out -> Ganti -> Zoom In)
+            
             if (newEmojiChar !== currentEmoji) {
-                // Tambah class hidden (zoom out)
+                
                 emojiSpan.classList.add('emoji-hidden');
                 
-                // Tunggu 300ms (sesuai durasi transition CSS)
                 setTimeout(() => {
                     emojiSpan.textContent = newEmojiChar;
-                    // Hapus class hidden (zoom in)
+                    
                     emojiSpan.classList.remove('emoji-hidden');
                 }, 300);
                 
@@ -288,8 +275,7 @@
             currentMode = newMode;
         }
     }
-
-    // Jantung Animasi Partikel
+    
     setInterval(() => {
         if (currentMode === 'low') {
             if (Math.random() > 0.92) createParticle('bubble');
