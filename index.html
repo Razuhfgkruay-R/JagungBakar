@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ultimate Level Bar - Smooth Morph</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(255, 255, 255, 0.05);
+            --blue-main: #3b82f6;
+            --yellow-main: #f59e0b;
+            --red-main: #ef4444;
+            --fire-orange: #ff6b00;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            overflow: hidden;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            width: 400px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .title {
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            opacity: 0.7;
+            margin-bottom: 40px;
+        }
+
+        .level-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            margin-bottom: 100px;
+        }
+
+        .icon-wrapper {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #1e293b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            z-index: 10;
+            position: relative;
+            border: 4px solid #334155;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            /* Transisi diperlambat jadi 0.8s agar smooth */
+            transition: border-color 0.3s ease, box-shadow 0.8s ease, transform 0.5s ease;
+            margin-left: 2px;
+        }
+
+        /* --- EMOJI ANIMATION CLASS --- */
+        /* Ini kunci agar emojinya smooth saat ganti */
+        .emoji-span {
+            display: inline-block;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.1s ease;
+        }
+        
+        /* Class untuk state "Hilang/Zoom Out" */
+        .emoji-hidden {
+            transform: scale(0) rotate(-45deg);
+            opacity: 0;
+        }
+
+        /* ----------------------------- */
+
+        .progress-track {
+            flex-grow: 1;
+            height: 32px; 
+            position: relative;
+            margin-left: -20px;
+            padding-left: 25px;
+            z-index: 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .progress-track::before {
+            content: '';
+            position: absolute;
+            left: 0; right: 0;
+            height: 36px; 
+            background: rgba(255,255,255,0.1);
+            border-radius: 0 18px 18px 0; 
+            z-index: -1;
+            top: 50%;
+            transform: translateY(-50%);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        .progress-fill-wrapper {
+            height: 100%;
+            width: 0%;
+            position: relative;
+            z-index: 2;
+            border-radius: 0 20px 20px 0;
+            /* Width transition biarkan cepat (0.4s) agar responsif, tapi shadow lambat */
+            transition: width 0.4s ease-out, box-shadow 0.8s ease; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .progress-fill-visual {
+            width: 100%;
+            height: 100%;
+            border-radius: 0 20px 20px 0;
+            background: linear-gradient(90deg, #3498db, #5dade2);
+            background-size: 200% 100%;
+            position: relative;
+            overflow: hidden;
+            /* Background transisi diperlambat jadi 1s */
+            transition: background 1s ease; 
+            animation: shimmer 2s infinite linear;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 100% 0; }
+            100% { background-position: -100% 0; }
+        }
+
+        .progress-fill-visual::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
+            transform: skewX(-20deg) translateX(-150%);
+            animation: glare 2.5s infinite;
+        }
+
+        @keyframes glare { 100% { transform: skewX(-20deg) translateX(200%); } }
+
+        /* --- STATES (Visual Properties) --- */
+        .state-low .icon-wrapper { border-color: var(--blue-main); box-shadow: 0 0 30px rgba(59, 130, 246, 0.3); }
+        .state-low .progress-fill-visual { background: linear-gradient(90deg, #1d4ed8, var(--blue-main)); }
+        .state-low .progress-fill-wrapper { box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4); }
+
+        .state-mid .icon-wrapper { border-color: var(--yellow-main); box-shadow: 0 0 30px rgba(245, 158, 11, 0.3); }
+        .state-mid .progress-fill-visual { background: linear-gradient(90deg, #d97706, var(--yellow-main)); }
+        .state-mid .progress-fill-wrapper { box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); }
+
+        .state-high .icon-wrapper { border-color: var(--red-main); }
+        .state-high .progress-fill-visual { background: linear-gradient(90deg, #991b1b, var(--red-main)); }
+        .state-high .progress-fill-wrapper { box-shadow: 0 4px 25px rgba(239, 68, 68, 0.8); }
+
+        /* --- ANIMASI GERAKAN (Dipisah agar tidak bentrok dengan transisi) --- */
+        .anim-float { animation: float 3s ease-in-out infinite; }
+        .anim-sway { animation: sway 2s ease-in-out infinite; }
+        .anim-shake { animation: intenseShake 0.1s infinite, fireFlicker 0.5s infinite alternate; }
+
+        @keyframes intenseShake {
+            0% { transform: translate(0, 0) rotate(0deg); } 25% { transform: translate(2px, 2px) rotate(1deg); } 50% { transform: translate(-2px, -2px) rotate(-1deg); } 75% { transform: translate(-2px, 2px) rotate(1deg); } 100% { transform: translate(0, 0) rotate(0deg); }
+        }
+        @keyframes fireFlicker { 0% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.6); } 100% { box-shadow: 0 0 80px var(--fire-orange); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes sway { 0% { transform: rotate(0deg); } 25% { transform: rotate(10deg); } 75% { transform: rotate(-10deg); } }
+
+        .controls { margin-top: 50px; }
+        input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; background: rgba(255,255,255,0.1); border-radius: 5px; outline: none; cursor: pointer; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; box-shadow: 0 0 10px rgba(255,255,255,0.5); transition: transform 0.2s; }
+        input[type=range]:active::-webkit-slider-thumb { transform: scale(1.3); }
+
+        .level-info { display: flex; justify-content: space-between; margin-top: 15px; font-size: 0.9rem; color: #94a3b8; }
+        #percentage { color: white; font-weight: 700; min-width: 45px; text-align: right; display: inline-block; }
+
+        #particles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; }
+        .particle { position: absolute; border-radius: 50%; pointer-events: none; animation: fadeUp 1s ease-out forwards; }
+        @keyframes fadeUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-80px) scale(0); } }
+
+    </style>
+</head>
+<body>
+
+<div id="particles"></div>
+
+<div class="glass-card" id="main-card">
+    <div class="title">Energy Monitor</div>
+
+    <div class="level-wrapper state-low" id="state-wrapper">
+        <div class="icon-wrapper anim-float" id="icon-anim-target">
+            <span id="emoji" class="emoji-span">😓</span>
+        </div>
+        
+        <div class="progress-track">
+            <div class="progress-fill-wrapper" id="bar-fill">
+                <div class="progress-fill-visual"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <input type="range" id="slider" min="0" max="100" value="10">
+        <div class="level-info">
+            <span>Power Level</span>
+            <span id="percentage">10%</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const slider = document.getElementById('slider');
+    const barFillWrapper = document.getElementById('bar-fill');
+    const wrapper = document.getElementById('state-wrapper');
+    const iconAnimTarget = document.getElementById('icon-anim-target');
+    const emojiSpan = document.getElementById('emoji');
+    const percentage = document.getElementById('percentage');
+    const particlesContainer = document.getElementById('particles');
+
+    let currentMode = 'low';
+    let currentEmoji = '😓';
+
+    slider.addEventListener('input', (e) => {
+        const val = parseInt(e.target.value);
+        updateUI(val);
+    });
+
+    function updateUI(val) {
+        percentage.textContent = val + '%';
+        barFillWrapper.style.width = val + '%';
+
+        // Deteksi Mode Baru
+        let newMode = currentMode;
+        let newEmojiChar = currentEmoji;
+
+        if (val < 40) {
+            newMode = 'low';
+            newEmojiChar = '😓';
+        } else if (val >= 40 && val < 80) {
+            newMode = 'mid';
+            newEmojiChar = '😄';
+        } else {
+            newMode = 'high';
+            newEmojiChar = '🔥';
+        }
+
+        // Hanya jalankan perubahan jika mode benar-benar berubah
+        if (newMode !== currentMode) {
+            // 1. Ganti State Warna (Smooth transition via CSS)
+            wrapper.classList.remove('state-low', 'state-mid', 'state-high');
+            wrapper.classList.add('state-' + newMode);
+
+            // 2. Ganti Animasi Gerak (Float/Sway/Shake)
+            iconAnimTarget.classList.remove('anim-float', 'anim-sway', 'anim-shake');
+            if(newMode === 'low') iconAnimTarget.classList.add('anim-float');
+            if(newMode === 'mid') iconAnimTarget.classList.add('anim-sway');
+            if(newMode === 'high') iconAnimTarget.classList.add('anim-shake');
+
+            // 3. EMOJI SMOOTH TRANSITION (Zoom Out -> Ganti -> Zoom In)
+            if (newEmojiChar !== currentEmoji) {
+                // Tambah class hidden (zoom out)
+                emojiSpan.classList.add('emoji-hidden');
+                
+                // Tunggu 300ms (sesuai durasi transition CSS)
+                setTimeout(() => {
+                    emojiSpan.textContent = newEmojiChar;
+                    // Hapus class hidden (zoom in)
+                    emojiSpan.classList.remove('emoji-hidden');
+                }, 300);
+                
+                currentEmoji = newEmojiChar;
+            }
+            
+            currentMode = newMode;
+        }
+    }
+
+    // Jantung Animasi Partikel
+    setInterval(() => {
+        if (currentMode === 'low') {
+            if (Math.random() > 0.92) createParticle('bubble');
+        } 
+        else if (currentMode === 'mid') {
+            if (Math.random() > 0.8) createParticle('spark');
+        } 
+        else if (currentMode === 'high') {
+            createParticle('fire');
+            if (Math.random() > 0.3) createParticle('fire');
+        }
+    }, 30);
+
+    function createParticle(type) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        
+        const cardRect = document.querySelector('.icon-wrapper').getBoundingClientRect();
+        const randomX = (Math.random() - 0.5) * 90; 
+        
+        p.style.left = (cardRect.left + 40 + randomX) + 'px';
+        p.style.top = (cardRect.top + 20) + 'px'; 
+
+        if(type === 'fire') {
+            const size = Math.random() * 15 + 5; 
+            p.style.width = size + 'px';
+            p.style.height = size + 'px';
+            const fireColors = ['#ef4444', '#f97316', '#eab308', '#ff0000', '#ff6b00'];
+            p.style.background = fireColors[Math.floor(Math.random() * fireColors.length)];
+            p.style.boxShadow = `0 0 15px ${p.style.background}`;
+            p.style.borderRadius = Math.random() > 0.5 ? '50%' : '50% 50% 0 50%';
+            p.style.animationDuration = (Math.random() * 0.4 + 0.3) + 's';
+        } 
+        else if (type === 'spark') {
+            const colors = ['#FFD700', '#00FFFF', '#FF69B4', '#7FFF00'];
+            const randomColor = colors[Math.floor(Math.random() * colors.length)];
+            p.style.width = Math.random() * 6 + 'px';
+            p.style.height = p.style.width;
+            p.style.background = randomColor;
+            p.style.boxShadow = `0 0 10px ${randomColor}`;
+            p.style.borderRadius = '50%';
+            p.style.top = (cardRect.top + 40) + 'px';
+            p.style.animationDuration = '1s';
+        }
+        else {
+            p.style.width = Math.random() * 10 + 4 + 'px';
+            p.style.height = p.style.width;
+            p.style.background = `rgba(59, 130, 246, 0.4)`;
+            p.style.border = '1px solid rgba(255, 255, 255, 0.6)';
+            p.style.top = (cardRect.top + 60) + 'px';
+            p.style.animationDuration = (Math.random() * 1.5 + 2) + 's';
+        }
+
+        particlesContainer.appendChild(p);
+        setTimeout(() => p.remove(), 4000);
+    }
+
+    updateUI(10);
+</script>
+
+</body>
+</html>
